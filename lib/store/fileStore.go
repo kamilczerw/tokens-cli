@@ -60,6 +60,7 @@ func (store *FileStore) ListDevices() ([]string, error) {
 
   var devices []string = nil
   for _, file := range files {
+    // TODO: Verify if the device has secret stored int keyring
     devices = append(devices, file.Name())
   }
 

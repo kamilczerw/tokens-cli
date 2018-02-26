@@ -94,6 +94,9 @@ func parseArgs(args []string, store store.Store) (Command, error) {
 	case "ls":
 		return parseListArgs(commandArgs[1:])
 
+	case "rm":
+		return parseRemoveArgs(commandArgs[1:])
+
 	case "version":
 		return &command.Version{}, nil
 
@@ -199,6 +202,33 @@ func parseGenerateArgs(args []string) (Command, error) {
 
 	cmd := &command.Generate{}
 	cmd.CopyMode = copyMode
+	cmd.AppName = flag.Arg(0)
+
+	return cmd, nil
+}
+
+func parseRemoveArgs(args []string) (Command, error) {
+	flag := pflag.NewFlagSet("rm", pflag.ContinueOnError)
+	flag.BoolP("help", "h", false, "Show help")
+	flag.Usage = func() {}
+	err := flag.Parse(args)
+	if err != nil {
+		return nil, err
+	}
+
+	if flag.Changed("help") {
+		return &command.AddHelp{}, nil
+	}
+
+	if flag.NArg() < 1 {
+		return nil, ErrNotEnoughArguments
+	}
+
+	if flag.NArg() > 1 {
+		return nil, ErrTooManyArguments
+	}
+
+	cmd := &command.Remove{}
 	cmd.AppName = flag.Arg(0)
 
 	return cmd, nil

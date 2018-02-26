@@ -36,9 +36,7 @@ func (generate *Generate) Run(store store.Store) error {
 		return err
 	}
 
-	fmt.Println(secret)
-
-	fmt.Printf("generate %s\n", generate.AppName)
+	fmt.Printf("generate token for '%s' with secret '%s'\n", generate.AppName, secret)
 	return nil
 }
 
