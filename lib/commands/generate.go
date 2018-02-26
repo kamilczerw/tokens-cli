@@ -9,6 +9,8 @@ import (
 	"encoding/pem"
 	"errors"
 	"encoding/base64"
+  "github.com/pquerna/otp/totp"
+  "time"
 )
 
 
@@ -16,6 +18,7 @@ import (
 type Generate struct {
 	AppName string
 	CopyMode bool
+	QuietMode bool
 }
 
 func (generate *Generate) Run(store store.Store) error {
@@ -36,7 +39,16 @@ func (generate *Generate) Run(store store.Store) error {
 		return err
 	}
 
-	fmt.Printf("generate token for '%s' with secret '%s'\n", generate.AppName, secret)
+  t := time.Now()
+  code, _ := totp.GenerateCode(secret, t)
+  seconds := 30 - int32(t.Unix() % 30)
+
+  if generate.QuietMode {
+  	fmt.Print(code)
+	} else {
+		fmt.Printf("Token: %s\nExpires in: %d seconds\n", code, seconds)
+	}
+
 	return nil
 }
 
@@ -69,6 +81,7 @@ Usage:
 
 Options:
   -c, --copy    Copy to clipboard 
+  -q, --quiet   Quiet mode 
 `)
 
 	return nil

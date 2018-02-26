@@ -14,6 +14,7 @@ import (
 	"log"
 	"encoding/pem"
 	"encoding/base64"
+	"strings"
 )
 
 var (
@@ -100,8 +101,9 @@ func GetSecrets() (Creds, error)  {
 }
 
 func GetSecret(message string, err error) (string, error) {
-	fmt.Println(message)
+	fmt.Print(message)
 	byteSecret, err := terminal.ReadPassword(int(syscall.Stdin))
+	fmt.Printf("\r %s \r", strings.Repeat(" ", len(message)))
 
 	if err != nil {
 		return "", err

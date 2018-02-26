@@ -181,6 +181,7 @@ func parseGenerateArgs(args []string) (Command, error) {
 	flag := pflag.NewFlagSet("generate", pflag.ContinueOnError)
 	flag.BoolP("help", "h", false, "Show help")
 	flag.BoolP("copy", "c", false, "Copy to clipboard")
+	flag.BoolP("quiet", "q", false, "Quiet mode")
 	flag.Usage = func() {}
 	err := flag.Parse(args)
 	if err != nil {
@@ -200,9 +201,15 @@ func parseGenerateArgs(args []string) (Command, error) {
 		return nil, err
 	}
 
+	quietMode, err := flag.GetBool("quiet")
+	if err != nil {
+		return nil, err
+	}
+
 	cmd := &command.Generate{}
-	cmd.CopyMode = copyMode
 	cmd.AppName = flag.Arg(0)
+	cmd.CopyMode = copyMode
+	cmd.QuietMode = quietMode
 
 	return cmd, nil
 }
