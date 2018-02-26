@@ -100,8 +100,9 @@ func parseArgs(args []string, store store.Store) (Command, error) {
 	default:
 		cmd := commandArgs[0]
 		if stringInSlice(cmd, devices) {
-			return &command.Version{}, nil
+			return parseGenerateArgs(commandArgs)
 		}
+
 		return nil, fmt.Errorf("'%s' is not a tokens command, or '%s' device doesn't exist.\n " +
 			"Use: 'tokens add %s' to add the device", commandArgs[0], commandArgs[0], commandArgs[0])
 	}
@@ -138,10 +139,10 @@ func parseAddArgs(args []string) (Command, error) {
 		return nil, ErrTooManyArguments
 	}
 
-	add := &command.Add{}
-	add.AppName = flag.Arg(0)
+	cmd := &command.Add{}
+	cmd.AppName = flag.Arg(0)
 
-	return add, nil
+	return cmd, nil
 }
 
 func parseListArgs(args []string) (Command, error) {
@@ -167,10 +168,40 @@ func parseListArgs(args []string) (Command, error) {
 		return nil, err
 	}
 
-	list := &command.List{}
-	list.QuietMode = quiet
+	cmd := &command.List{}
+	cmd.QuietMode = quiet
 
-	return list, nil
+	return cmd, nil
+}
+
+func parseGenerateArgs(args []string) (Command, error) {
+	flag := pflag.NewFlagSet("generate", pflag.ContinueOnError)
+	flag.BoolP("help", "h", false, "Show help")
+	flag.BoolP("copy", "c", false, "Copy to clipboard")
+	flag.Usage = func() {}
+	err := flag.Parse(args)
+	if err != nil {
+		return nil, err
+	}
+
+	if flag.Changed("help") {
+		return &command.GenerateHelp{}, nil
+	}
+
+	if flag.NArg() > 1 {
+		return nil, ErrTooManyArguments
+	}
+
+	copyMode, err := flag.GetBool("copy")
+	if err != nil {
+		return nil, err
+	}
+
+	cmd := &command.Generate{}
+	cmd.CopyMode = copyMode
+	cmd.AppName = flag.Arg(0)
+
+	return cmd, nil
 }
 
 func stringInSlice(a string, list []string) bool {

@@ -12,6 +12,8 @@ import (
 	"crypto/rand"
 	"github.com/kamilczerw/tokens-cli/lib/store"
 	"log"
+	"encoding/pem"
+	"encoding/base64"
 )
 
 var (
@@ -52,8 +54,9 @@ func (add *Add) Run(store store.Store) error {
 		log.Fatal(err)
 		return err
 	}
+	encoded := base64.StdEncoding.EncodeToString([]byte(encrypted))
 
-	err = keyring.Set(add.AppName, "tokens", encrypted)
+	err = keyring.Set(add.AppName, "tokens", encoded)
 	if err != nil {
 		log.Fatal(err)
 		return err
@@ -141,7 +144,9 @@ func encrypt(creds Creds) (string, error) {
 		os.Exit(1)
 	}
 
-	return string(EncryptedPEMBlock.Bytes), nil
+	encoded := pem.EncodeToMemory(EncryptedPEMBlock)
+
+	return string(encoded), nil
 }
 
 type AddHelp struct {}
@@ -155,3 +160,5 @@ Usage:
 
 	return nil
 }
+
+
